@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morsun Besin Yolculuğu</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(to bottom, #eaf7ff, #cfeeff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #103b52;
+    }
+
+    .game-shell {
+      width: min(960px, 96vw);
+      background: #f7fdff;
+      border: 3px solid #b8e5f8;
+      border-radius: 22px;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: #dff4ff;
+      border-bottom: 2px solid #c4e9f7;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .title-wrap p {
+      margin: 4px 0 0;
+      font-size: 0.95rem;
+      color: #2d617a;
+    }
+
+    .score-panel {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #ffffff;
+      border: 2px solid #bde5f7;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 700;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .controls {
+      padding: 10px 18px;
+      background: #f2fbff;
+      border-bottom: 1px solid #d7eef8;
+      font-size: 0.95rem;
+      color: #29556b;
+    }
+
+    .game-area {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      overflow: hidden;
+      background:
+        linear-gradient(to bottom,
+          #f7fdff 0%,
+          #ddf5ff 14%,
+          #aee3f8 35%,
+          #5fbddf 72%,
+          #2c86ad 100%);
+    }
+
+    .ice-surface {
+      position: absolute;
+      top: 52px;
+      left: 0;
+      width: 100%;
+      height: 48px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #f8ffff 0 70px,
+          #d7f5ff 70px 120px,
+          #edfaff 120px 170px
+        );
+      border-bottom: 3px solid #b2e7fa;
+      opacity: 0.95;
+    }
+
+    .seabed {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 88px;
+      background:
+        radial-gradient(circle at 20% 40%, #d5c29f 0 14px, transparent 15px),
+        radial-gradient(circle at 55% 55%, #c4ae86 0 18px, transparent 19px),
+        radial-gradient(circle at 78% 35%, #d7c59b 0 12px, transparent 13px),
+        linear-gradient(to top, #9a7c57, #b99a71 62%, #c7ac81 100%);
+    }
+
+    .bg-fish {
+      position: absolute;
+      font-size: 22px;
+      opacity: 0.28;
+      animation: bgSwim linear infinite;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes bgSwim {
+      from { transform: translateX(1000px); }
+      to { transform: translateX(-120px); }
+    }
+
+    .player {
+      position: absolute;
+      left: 110px;
+      top: 250px;
+      width: 120px;
+      height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,0.18));
+      transform-origin: center;
+    }
+
+    .player.blink {
+      animation: blink 0.15s linear 3;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.25; }
+    }
+
+    .walrus-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .entity {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .collectible {
+      font-size: 34px;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.14));
+    }
+
+    .obstacle {
+      font-size: 46px;
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,0.15));
+    }
+
+    .label {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      white-space: nowrap;
+      color: #08344a;
+      font-weight: 700;
+      background: rgba(255,255,255,0.65);
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    .fact-card {
+      position: absolute;
+      left: 50%;
+      top: 22px;
+      transform: translateX(-50%);
+      width: min(88%, 620px);
+      background: rgba(255,255,255,0.94);
+      border: 2px solid #bde5f7;
+      border-radius: 18px;
+      padding: 12px 16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+      text-align: center;
+      font-weight: 700;
+      color: #14465d;
+      display: none;
+      z-index: 20;
+    }
+
+    .fact-card.show {
+      display: block;
+      animation: factIn 0.35s ease;
+    }
+
+    @keyframes factIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 42, 61, 0.46);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      padding: 18px;
+    }
+
+    .panel {
+      width: min(92%, 540px);
+      background: #f8fdff;
+      border: 3px solid #c3ebfa;
+      border-radius: 24px;
+      padding: 24px 22px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.7rem;
+      color: #103d53;
+    }
+
+    .panel p {
+      color: #2b5d72;
+      line-height: 1.5;
+      margin: 10px 0;
+    }
+
+    .panel .emoji-big {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: #57bfe4;
+      color: white;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+
+    button.secondary {
+      background: #8aaec0;
+    }
+
+    .legend {
+      padding: 14px 18px 18px;
+      background: #f6fcff;
+      border-top: 1px solid #d7eef8;
+      color: #244d62;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .legend strong {
+      color: #103c51;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .mini-card {
+      background: white;
+      border: 1.5px solid #d1edf8;
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    @media (max-width: 700px) {
+      .game-area { height: 480px; }
+      .player { left: 70px; width: 100px; height: 72px; }
+      .controls, .legend { font-size: 0.9rem; }
+      .panel h2 { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-shell">
+    <div class="topbar">
+      <div class="title-wrap">
+        <h1>🦭 Morsun Kış Hazırlığı</h1>
+        <p>Midye topla, tehlikelerden kaç, Arktik’te hayatta kal.</p>
+      </div>
+      <div class="score-panel">
+        <div class="pill">Puan: <span id="score">0</span></div>
+        <div class="pill">Rekor: <span id="bestScore">0</span></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <strong>Kontroller:</strong> Yukarı Ok / W / Space = yukarı çık • Aşağı Ok / S = aşağı in
+    </div>
+
+    <div id="gameArea" class="game-area">
+      <div class="ice-surface"></div>
+      <div class="seabed"></div>
+
+      <div id="factCard" class="fact-card"></div>
+
+      <div id="player" class="player" aria-label="mors">
+        <svg class="walrus-svg" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="72" cy="55" rx="42" ry="26" fill="#7b6f76"/>
+          <ellipse cx="40" cy="58" rx="24" ry="18" fill="#8b7f86"/>
+          <ellipse cx="30" cy="45" rx="7" ry="7" fill="#8b7f86"/>
+          <ellipse cx="44" cy="42" rx="7" ry="7" fill="#8b7f86"/>
+          <circle cx="32" cy="55" r="3" fill="#1f2d3a"/>
+          <circle cx="43" cy="55" r="3" fill="#1f2d3a"/>
+          <ellipse cx="37.5" cy="64" rx="8" ry="5" fill="#5f4f56"/>
+          <rect x="31" y="66" width="4" height="18" rx="2" fill="#f4eee8"/>
+          <rect x="40" y="66" width="4" height="18" rx="2" fill="#f4eee8"/>
+          <line x1="22" y1="66" x2="8" y2="62" stroke="#e8f7ff" stroke-width="2"/>
+          <line x1="22" y1="69" x2="7" y2="69" stroke="#e8f7ff" stroke-width="2"/>
+          <line x1="22" y1="72" x2="9" y2="77" stroke="#e8f7ff" stroke-width="2"/>
+          <line x1="53" y1="66" x2="66" y2="62" stroke="#e8f7ff" stroke-width="2"/>
+          <line x1="53" y1="69" x2="68" y2="69" stroke="#e8f7ff" stroke-width="2"/>
+          <line x1="53" y1="72" x2="66" y2="77" stroke="#e8f7ff" stroke-width="2"/>
+          <ellipse cx="100" cy="47" rx="18" ry="10" fill="#7b6f76"/>
+          <ellipse cx="111" cy="68" rx="12" ry="7" fill="#73676e"/>
+          <ellipse cx="95" cy="77" rx="16" ry="7" fill="#6c6067"/>
+        </svg>
+      </div>
+
+      <div id="startOverlay" class="overlay">
+        <div class="panel">
+          <div class="emoji-big">🦭🐚❄️</div>
+          <h2>Arktik Derinlik Avı</h2>
+          <p>
+            Morsu kontrol et, deniz tabanındaki besinleri topla ve
+            orka, buz bloğu, ağ gibi tehlikelerden kaç.
+          </p>
+          <p>
+            <strong>Midye:</strong> +10 puan &nbsp;|&nbsp;
+            <strong>Deniz tarağı:</strong> +20 puan &nbsp;|&nbsp;
+            <strong>Bonus:</strong> +50 puan
+          </p>
+          <div class="btn-row">
+            <button id="startBtn">Oyunu Başlat</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameOverOverlay" class="overlay" style="display:none;">
+        <div class="panel">
+          <div class="emoji-big">🌊</div>
+          <h2>Oyun Bitti</h2>
+          <p>Topladığın toplam puan: <strong id="finalScore">0</strong></p>
+          <p id="gameOverText">Morsun yeni bir av yolculuğuna hazır.</p>
+          <div class="btn-row">
+            <button id="restartBtn">Tekrar Oyna</button>
+            <button id="closeBtn" class="secondary">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <strong>Oyun Mantığı:</strong> T-Rex tarzı sürekli akan bir oyun yapısında,
+      mors karakteri su içinde dikey hareket eder. Amaç hem eğlenmek hem de kutup
+      canlılarıyla ilgili farkındalık kazanmaktır.
+
+      <div class="mini-grid">
+        <div class="mini-card"><strong>🦪 Midye</strong><br> Morsların önemli besin kaynaklarından biridir.</div>
+        <div class="mini-card"><strong>🐋 Orka</strong><br> Tehlikeli bir engeldir. Çarparsan oyun biter.</div>
+        <div class="mini-card"><strong>🧊 Buz Bloğu</strong><br> Yolunu kapatır, dikkatli yön değiştir.</div>
+        <div class="mini-card"><strong>🎣 Ağ</strong><br> İnsan etkisini temsil eder; kaçınman gerekir.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const player = document.getElementById("player");
+    const scoreEl = document.getElementById("score");
+    const bestScoreEl = document.getElementById("bestScore");
+    const factCard = document.getElementById("factCard");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const finalScore = document.getElementById("finalScore");
+    const gameOverText = document.getElementById("gameOverText");
+
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const closeBtn = document.getElementById("closeBtn");
+
+    const GAME_W = () => gameArea.clientWidth;
+    const GAME_H = () => gameArea.clientHeight;
+
+    const playerState = {
+      x: 110,
+      y: 250,
+      w: 120,
+      h: 86,
+      moveUp: false,
+      moveDown: false
+    };
+
+    let score = 0;
+    let bestScore = Number(localStorage.getItem("morsBestScore") || 0);
+    let speed = 4.8;
+    let running = false;
+    let animationFrame = null;
+    let spawnTimer = 0;
+    let bgFishTimer = 0;
+    let infoIndex = 0;
+    let lastFactScore = 0;
+
+    const collectibles = [];
+    const obstacles = [];
+    const backgroundFish = [];
+
+    const facts = [
+      "Morslar çoğunlukla midye, yumuşakça ve kabuklularla beslenir.",
+      "Morsların uzun dişleri yalnızca savunma için değil, buz üzerine çıkarken destek için de kullanılır.",
+      "Morslar bıyıkları sayesinde deniz tabanındaki besinleri algılayabilir.",
+      "Arktik ekosistemi iklim değişikliğine karşı çok hassastır.",
+      "Deniz buzundaki değişimler kutup canlılarının yaşamını doğrudan etkiler."
+    ];
+
+    function updateBestScore() {
+      bestScoreEl.textContent = bestScore;
+      localStorage.setItem("morsBestScore", String(bestScore));
+    }
+
+    updateBestScore();
+
+    function showFact(text) {
+      factCard.textContent = "ℹ️ " + text;
+      factCard.classList.add("show");
+      clearTimeout(showFact._timer);
+      showFact._timer = setTimeout(() => {
+        factCard.classList.remove("show");
+      }, 2600);
+    }
+
+    function createEntity(type, emoji, x, y, w, h, labelText, extraClass = "") {
+      const el = document.createElement("div");
+      el.className = `entity ${type} ${extraClass}`.trim();
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.width = w + "px";
+      el.style.height = h + "px";
+      el.textContent = emoji;
+
+      if (labelText) {
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = labelText;
+        el.appendChild(label);
+      }
+
+      gameArea.appendChild(el);
+      return el;
+    }
+
+    function spawnCollectible() {
+      const kinds = [
+        { emoji: "🦪", label: "Midye", points: 10, size: 38 },
+        { emoji: "🐚", label: "Deniz Tarağı", points: 20, size: 38 },
+        { emoji: "💎", label: "Bonus", points: 50, size: 34 }
+      ];
+
+      let kind;
+      const r = Math.random();
+      if (r < 0.08) kind = kinds[2];
+      else if (r < 0.42) kind = kinds[1];
+      else kind = kinds[0];
+
+      const x = GAME_W() + 30;
+      const y = randomBetween(110, GAME_H() - 120);
+
+      const obj = {
+        x,
+        y,
+        w: kind.size,
+        h: kind.size,
+        points: kind.points,
+        kind: "collectible",
+        element: createEntity("collectible", kind.emoji, x, y, kind.size, kind.size, kind.label)
+      };
+
+      collectibles.push(obj);
+    }
+
+    function spawnObstacle() {
+      const kinds = [
+        { emoji: "🐋", label: "Orka", w: 68, h: 56 },
+        { emoji: "🧊", label: "Buz Bloğu", w: 58, h: 58 },
+        { emoji: "🎣", label: "Ağ", w: 58, h: 58 }
+      ];
+
+      const kind = kinds[Math.floor(Math.random() * kinds.length)];
+      const x = GAME_W() + 40;
+      const y = randomBetween(105, GAME_H() - 130);
+
+      const obj = {
+        x,
+        y,
+        w: kind.w,
+        h: kind.h,
+        kind: "obstacle",
+        element: createEntity("obstacle", kind.emoji, x, y, kind.w, kind.h, kind.label)
+      };
+
+      obstacles.push(obj);
+    }
+
+    function spawnBackgroundFish() {
+      const fish = document.createElement("div");
+      fish.className = "bg-fish";
+      fish.textContent = Math.random() > 0.5 ? "🐟" : "🐠";
+      fish.style.top = randomBetween(120, GAME_H() - 140) + "px";
+      fish.style.animationDuration = randomBetween(10, 18) + "s";
+      fish.style.fontSize = randomBetween(18, 26) + "px";
+      gameArea.appendChild(fish);
+
+      backgroundFish.push(fish);
+
+      setTimeout(() => {
+        fish.remove();
+        const i = backgroundFish.indexOf(fish);
+        if (i >= 0) backgroundFish.splice(i, 1);
+      }, 19000);
+    }
+
+    function resetGame() {
+      score = 0;
+      speed = 4.8;
+      spawnTimer = 0;
+      bgFishTimer = 0;
+      infoIndex = 0;
+      lastFactScore = 0;
+      scoreEl.textContent = score;
+
+      playerState.y = 250;
+      playerState.moveUp = false;
+      playerState.moveDown = false;
+      player.classList.remove("blink");
+
+      collectibles.forEach(o => o.element.remove());
+      obstacles.forEach(o => o.element.remove());
+      backgroundFish.forEach(f => f.remove());
+      collectibles.length = 0;
+      obstacles.length = 0;
+      backgroundFish.length = 0;
+
+      updatePlayer();
+      factCard.classList.remove("show");
+    }
+
+    function startGame() {
+      resetGame();
+      startOverlay.style.display = "none";
+      gameOverOverlay.style.display = "none";
+      running = true;
+      loop();
+    }
+
+    function endGame(reasonText) {
+      running = false;
+      cancelAnimationFrame(animationFrame);
+      player.classList.add("blink");
+
+      finalScore.textContent = score;
+      gameOverText.textContent = reasonText;
+
+      if (score > bestScore) {
+        bestScore = score;
+        updateBestScore();
+      }
+
+      setTimeout(() => {
+        gameOverOverlay.style.display = "flex";
+      }, 250);
+    }
+
+    function updatePlayer() {
+      const upperBound = 95;
+      const lowerBound = GAME_H() - 95;
+
+      if (playerState.moveUp) playerState.y -= 6;
+      if (playerState.moveDown) playerState.y += 6;
+
+      playerState.y = Math.max(upperBound, Math.min(lowerBound, playerState.y));
+
+      player.style.left = playerState.x + "px";
+      player.style.top = playerState.y + "px";
+
+      if (playerState.moveUp) {
+        player.style.transform = "scaleX(-1) rotate(-10deg)";
+      } else if (playerState.moveDown) {
+        player.style.transform = "scaleX(-1) rotate(10deg)";
+      } else {
+        player.style.transform = "scaleX(-1) rotate(0deg)";
+      }
+    }
+
+    function rectsOverlap(a, b) {
+      return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+      );
+    }
+
+    function playerRect() {
+      return {
+        x: playerState.x + 10,
+        y: playerState.y + 14,
+        w: playerState.w - 22,
+        h: playerState.h - 26
+      };
+    }
+
+    function updateEntities(arr, isObstacle = false) {
+      for (let i = arr.length - 1; i >= 0; i--) {
+        const obj = arr[i];
+        obj.x -= speed;
+        obj.element.style.left = obj.x + "px";
+        obj.element.style.top = obj.y + "px";
+
+        if (obj.x + obj.w < -30) {
+          obj.element.remove();
+          arr.splice(i, 1);
+          continue;
+        }
+
+        if (rectsOverlap(playerRect(), obj)) {
+          if (isObstacle) {
+            let text = "Mors bir engele çarptı.";
+            if (obj.element.textContent.includes("🐋")) text = "Orkadan kaçamadın.";
+            else if (obj.element.textContent.includes("🧊")) text = "Buz bloğuna çarptın.";
+            else if (obj.element.textContent.includes("🎣")) text = "Ağa takıldın.";
+            endGame(text);
+            return true;
+          } else {
+            score += obj.points;
+            scoreEl.textContent = score;
+            obj.element.remove();
+            arr.splice(i, 1);
+
+            if (score % 100 < obj.points) {
+              speed += 0.45;
+            }
+
+            if (score - lastFactScore >= 80) {
+              showFact(facts[infoIndex % facts.length]);
+              infoIndex++;
+              lastFactScore = score;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function loop() {
+      if (!running) return;
+
+      updatePlayer();
+
+      spawnTimer++;
+      bgFishTimer++;
+
+      if (bgFishTimer > 130) {
+        spawnBackgroundFish();
+        bgFishTimer = 0;
+      }
+
+      if (spawnTimer > 38) {
+        const chance = Math.random();
+
+        if (chance < 0.55) spawnCollectible();
+        else spawnObstacle();
+
+        if (Math.random() < 0.25) {
+          setTimeout(() => {
+            if (!running) return;
+            if (Math.random() < 0.55) spawnCollectible();
+            else spawnObstacle();
+          }, 500);
+        }
+
+        spawnTimer = 0;
+      }
+
+      if (updateEntities(collectibles, false)) return;
+      if (updateEntities(obstacles, true)) return;
+
+      animationFrame = requestAnimationFrame(loop);
+    }
+
+    function randomBetween(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+
+      if (["arrowup", "w", " "].includes(key)) {
+        e.preventDefault();
+        playerState.moveUp = true;
+      }
+
+      if (["arrowdown", "s"].includes(key)) {
+        e.preventDefault();
+        playerState.moveDown = true;
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      const key = e.key.toLowerCase();
+
+      if (["arrowup", "w", " "].includes(key)) {
+        playerState.moveUp = false;
+      }
+
+      if (["arrowdown", "s"].includes(key)) {
+        playerState.moveDown = false;
+      }
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+
+    closeBtn.addEventListener("click", () => {
+      gameOverOverlay.style.display = "none";
+      startOverlay.style.display = "flex";
+    });
+
+    updatePlayer();
+  </script>
+</body>
+</html>
