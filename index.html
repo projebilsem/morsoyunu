@@ -172,13 +172,18 @@
     }
 
     .collectible {
-      font-size: 34px;
+      font-size: 44px; /* Midye boyutunu büyüttüm */
       filter: drop-shadow(0 4px 4px rgba(0,0,0,0.14));
     }
 
     .obstacle {
-      font-size: 46px;
+      font-size: 50px; /* Diğer engellerin boyutu */
       filter: drop-shadow(0 5px 5px rgba(0,0,0,0.15));
+    }
+
+    .entity.obstacle svg {
+      width: 100%;
+      height: 100%;
     }
 
     .label {
@@ -259,7 +264,14 @@
       margin: 10px 0;
     }
 
-    .panel .emoji-big {
+    .walrus-preview {
+      width: 140px;
+      height: 100px;
+      margin: 0 auto 15px;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15));
+    }
+
+    .emoji-big {
       font-size: 60px;
       margin-bottom: 10px;
     }
@@ -293,7 +305,6 @@
       background: #8aaec0;
     }
 
-    /* Görseldeki Legend Bölümü için Stiller */
     .legend-content {
       margin-top: 20px;
       padding-top: 20px;
@@ -323,12 +334,26 @@
       font-size: 0.9rem;
       line-height: 1.4;
       color: #244d62;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
 
     .mini-card strong {
       color: #103c51;
       display: block;
       margin-bottom: 4px;
+    }
+
+    .legend-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      width: 60px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     @media (max-width: 700px) {
@@ -341,6 +366,19 @@
   </style>
 </head>
 <body>
+  <!-- Orka SVG Şablonu -->
+  <svg id="svg-templates" style="display:none;">
+    <symbol id="orca-template" viewBox="0 0 140 100">
+      <path d="M10,45 C15,25 45,15 80,25 C110,35 130,65 125,85 C120,95 100,100 80,95 C55,90 20,75 10,45" fill="#333a41" />
+      <path d="M20,60 C35,50 65,45 90,60 C110,75 115,85 100,90 C80,95 40,90 20,60" fill="#ffffff" opacity="0.9" />
+      <path d="M60,32 C70,10 90,5 105,10 L90,32 C80,28 70,30 60,32" fill="#333a41" />
+      <ellipse cx="38" cy="36" rx="10" ry="5" fill="#ffffff" transform="rotate(-15, 38, 36)" />
+      <circle cx="28" cy="45" r="3" fill="#000000" />
+      <path d="M125,85 C135,95 140,90 140,80 L120,70 C115,80 120,80 125,85" fill="#333a41" />
+      <path d="M55,65 C50,80 65,90 75,85 L70,65 C65,68 60,68 55,65" fill="#222" />
+    </symbol>
+  </svg>
+
   <div class="game-shell">
     <div class="topbar">
       <div class="title-wrap">
@@ -388,24 +426,47 @@
 
       <div id="startOverlay" class="overlay">
         <div class="panel">
-          <div class="emoji-big">🦦</div>
+          <div class="walrus-preview">
+            <svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="72" cy="55" rx="42" ry="26" fill="#7b6f76"/>
+              <ellipse cx="40" cy="58" rx="24" ry="18" fill="#8b7f86"/>
+              <ellipse cx="30" cy="45" rx="7" ry="7" fill="#8b7f86"/>
+              <ellipse cx="44" cy="42" rx="7" ry="7" fill="#8b7f86"/>
+              <circle cx="32" cy="55" r="3" fill="#1f2d3a"/>
+              <circle cx="43" cy="55" r="3" fill="#1f2d3a"/>
+              <ellipse cx="37.5" cy="64" rx="8" ry="5" fill="#5f4f56"/>
+              <rect x="31" y="66" width="4" height="18" rx="2" fill="#f4eee8"/>
+              <rect x="40" y="66" width="4" height="18" rx="2" fill="#f4eee8"/>
+              <line x1="22" y1="66" x2="8" y2="62" stroke="#e8f7ff" stroke-width="2"/>
+              <line x1="22" y1="69" x2="7" y2="69" stroke="#e8f7ff" stroke-width="2"/>
+              <line x1="22" y1="72" x2="9" y2="77" stroke="#e8f7ff" stroke-width="2"/>
+              <line x1="53" y1="66" x2="66" y2="62" stroke="#e8f7ff" stroke-width="2"/>
+              <line x1="53" y1="69" x2="68" y2="69" stroke="#e8f7ff" stroke-width="2"/>
+              <line x1="53" y1="72" x2="66" y2="77" stroke="#e8f7ff" stroke-width="2"/>
+              <ellipse cx="100" cy="47" rx="18" ry="10" fill="#7b6f76"/>
+              <ellipse cx="111" cy="68" rx="12" ry="7" fill="#73676e"/>
+              <ellipse cx="95" cy="77" rx="16" ry="7" fill="#6c6067"/>
+            </svg>
+          </div>
           <h2>Morsun Besin Yolculuğu</h2>
-          <p>
-            Morsu kontrol ederek derinliklerdeki besinleri topla. Tehlikelerden kaçarak en yüksek puanı yapmaya çalış!
-          </p>
+          <p>Morsu kontrol ederek derinliklerdeki besinleri topla. Tehlikelerden kaçarak en yüksek puanı yapmaya çalış!</p>
           
           <div class="btn-row">
             <button id="startBtn">Oyunu Başlat</button>
           </div>
 
-          <!-- Görseldeki bölüm artık sadece burada -->
           <div class="legend-content">
-            <span class="legend-title">Oyun Mantığı: Mors dikey hareket eder, engellere takılmadan beslenmelidir.</span>
+            <span class="legend-title">Oyun Nesneleri</span>
             <div class="mini-grid">
-              <div class="mini-card"><strong>🦪 Midye</strong>Morsların temel besin kaynağıdır. (+10 Puan)</div>
-              <div class="mini-card"><strong>🐋 Orka</strong>Tehlikeli bir avcıdır. Çarparsan oyun biter!</div>
-              <div class="mini-card"><strong>🧊 Buz Bloğu</strong>Yolunu kapatır, dikkatli yön değiştir.</div>
-              <div class="mini-card"><strong>🎣 Ağ</strong>İnsan etkisini temsil eder; kaçınman gerekir.</div>
+              <div class="mini-card"><div class="legend-icon">🦪</div><strong>Midye</strong>Besin kaynağı. (+10 Puan)</div>
+              <div class="mini-card">
+                <div class="legend-icon">
+                  <svg style="width:100%; height:100%;"><use href="#orca-template"/></svg>
+                </div>
+                <strong>Orka</strong>Tehlikeli avcı! Çarparsan biter.
+              </div>
+              <div class="mini-card"><div class="legend-icon">🧊</div><strong>Buz Bloğu</strong>Yolunu kapatan engel.</div>
+              <div class="mini-card"><div class="legend-icon">🎣</div><strong>Ağ</strong>Kaçınman gereken insan etkisi.</div>
             </div>
           </div>
         </div>
@@ -416,7 +477,6 @@
           <div class="emoji-big">🌊</div>
           <h2>Oyun Bitti</h2>
           <p>Topladığın puan: <strong id="finalScore">0</strong></p>
-          <p id="gameOverText">Morsun yeni bir av yolculuğuna hazır.</p>
           <div class="btn-row">
             <button id="restartBtn">Tekrar Oyna</button>
             <button id="closeBtn" class="secondary">Giriş Ekranına Dön</button>
@@ -436,7 +496,6 @@
     const startOverlay = document.getElementById("startOverlay");
     const gameOverOverlay = document.getElementById("gameOverOverlay");
     const finalScore = document.getElementById("finalScore");
-    const gameOverText = document.getElementById("gameOverText");
 
     const startBtn = document.getElementById("startBtn");
     const restartBtn = document.getElementById("restartBtn");
@@ -492,14 +551,19 @@
       }, 3000);
     }
 
-    function createEntity(type, emoji, x, y, w, h, labelText) {
+    function createEntity(type, content, x, y, w, h, labelText, isSVG = false) {
       const el = document.createElement("div");
       el.className = `entity ${type}`;
       el.style.left = x + "px";
       el.style.top = y + "px";
       el.style.width = w + "px";
       el.style.height = h + "px";
-      el.textContent = emoji;
+      
+      if(isSVG) {
+        el.innerHTML = content;
+      } else {
+        el.textContent = content;
+      }
 
       if (labelText) {
         const label = document.createElement("div");
@@ -514,9 +578,9 @@
 
     function spawnCollectible() {
       const kinds = [
-        { emoji: "🦪", label: "Midye", points: 10, size: 38 },
-        { emoji: "🐚", label: "Deniz Tarağı", points: 20, size: 38 },
-        { emoji: "💎", label: "Bonus", points: 50, size: 34 }
+        { emoji: "🦪", label: "Midye", points: 10, size: 52 }, /* Boyutları büyüttüm */
+        { emoji: "🐚", label: "Deniz Tarağı", points: 20, size: 52 },
+        { emoji: "💎", label: "Bonus", points: 50, size: 48 }
       ];
 
       let kind;
@@ -537,18 +601,21 @@
 
     function spawnObstacle() {
       const kinds = [
-        { emoji: "🐋", label: "Orka", w: 68, h: 56 },
-        { emoji: "🧊", label: "Buz Bloğu", w: 58, h: 58 },
-        { emoji: "🎣", label: "Ağ", w: 58, h: 58 }
+        { id: "orca", label: "Orka", w: 85, h: 60, isSVG: true, /* Orkayı küçülttüm */
+          svg: '<svg viewBox="0 0 140 100"><use href="#orca-template"/></svg>' },
+        { id: "ice", emoji: "🧊", label: "Buz Bloğu", w: 55, h: 55, isSVG: false },
+        { id: "net", emoji: "🎣", label: "Balıkçı Ağı", w: 55, h: 55, isSVG: false }
       ];
 
       const kind = kinds[Math.floor(Math.random() * kinds.length)];
       const x = GAME_W() + 40;
       const y = randomBetween(105, GAME_H() - 130);
 
+      const content = kind.isSVG ? kind.svg : kind.emoji;
+
       const obj = {
-        x, y, w: kind.w, h: kind.h,
-        element: createEntity("obstacle", kind.emoji, x, y, kind.w, kind.h, kind.label)
+        x, y, w: kind.w, h: kind.h, id: kind.id,
+        element: createEntity("obstacle", content, x, y, kind.w, kind.h, kind.label, kind.isSVG)
       };
       obstacles.push(obj);
     }
@@ -571,12 +638,8 @@
     }
 
     function resetGame() {
-      score = 0;
-      speed = 4.8;
-      spawnTimer = 0;
-      bgFishTimer = 0;
-      infoIndex = 0;
-      lastFactScore = 0;
+      score = 0; speed = 4.8; spawnTimer = 0; bgFishTimer = 0;
+      infoIndex = 0; lastFactScore = 0;
       scoreEl.textContent = score;
 
       playerState.y = 250;
@@ -587,9 +650,7 @@
       collectibles.forEach(o => o.element.remove());
       obstacles.forEach(o => o.element.remove());
       backgroundFish.forEach(f => f.remove());
-      collectibles.length = 0;
-      obstacles.length = 0;
-      backgroundFish.length = 0;
+      collectibles.length = 0; obstacles.length = 0; backgroundFish.length = 0;
 
       updatePlayer();
       factCard.classList.remove("show");
@@ -603,14 +664,12 @@
       loop();
     }
 
-    function endGame(reasonText) {
+    function endGame() {
       running = false;
       cancelAnimationFrame(animationFrame);
       player.classList.add("blink");
 
       finalScore.textContent = score;
-      gameOverText.textContent = reasonText;
-
       if (score > bestScore) {
         bestScore = score;
         updateBestScore();
@@ -633,13 +692,9 @@
       player.style.left = playerState.x + "px";
       player.style.top = playerState.y + "px";
 
-      if (playerState.moveUp) {
-        player.style.transform = "scaleX(-1) rotate(-12deg)";
-      } else if (playerState.moveDown) {
-        player.style.transform = "scaleX(-1) rotate(12deg)";
-      } else {
-        player.style.transform = "scaleX(-1) rotate(0deg)";
-      }
+      if (playerState.moveUp) player.style.transform = "scaleX(-1) rotate(-12deg)";
+      else if (playerState.moveDown) player.style.transform = "scaleX(-1) rotate(12deg)";
+      else player.style.transform = "scaleX(-1) rotate(0deg)";
     }
 
     function rectsOverlap(a, b) {
@@ -647,12 +702,7 @@
     }
 
     function playerRect() {
-      return {
-        x: playerState.x + 15,
-        y: playerState.y + 15,
-        w: playerState.w - 30,
-        h: playerState.h - 30
-      };
+      return { x: playerState.x + 15, y: playerState.y + 15, w: playerState.w - 30, h: playerState.h - 30 };
     }
 
     function updateEntities(arr, isObstacle = false) {
@@ -661,7 +711,7 @@
         obj.x -= speed;
         obj.element.style.left = obj.x + "px";
 
-        if (obj.x + obj.w < -50) {
+        if (obj.x + obj.w < -120) {
           obj.element.remove();
           arr.splice(i, 1);
           continue;
@@ -669,20 +719,14 @@
 
         if (rectsOverlap(playerRect(), obj)) {
           if (isObstacle) {
-            let text = "Mors bir engele çarptı.";
-            if (obj.element.textContent.includes("🐋")) text = "Orkadan kaçamadın!";
-            else if (obj.element.textContent.includes("🧊")) text = "Buz bloğuna çarptın.";
-            else if (obj.element.textContent.includes("🎣")) text = "Balıkçı ağına takıldın.";
-            endGame(text);
+            endGame();
             return true;
           } else {
             score += obj.points;
             scoreEl.textContent = score;
             obj.element.remove();
             arr.splice(i, 1);
-
             if (score % 100 < obj.points) speed += 0.35;
-
             if (score - lastFactScore >= 100) {
               showFact(facts[infoIndex % facts.length]);
               infoIndex++;
@@ -697,21 +741,15 @@
     function loop() {
       if (!running) return;
       updatePlayer();
-      spawnTimer++;
-      bgFishTimer++;
-
+      spawnTimer++; bgFishTimer++;
       if (bgFishTimer > 150) { spawnBackgroundFish(); bgFishTimer = 0; }
-
       if (spawnTimer > 45) {
-        const chance = Math.random();
-        if (chance < 0.6) spawnCollectible();
+        if (Math.random() < 0.6) spawnCollectible();
         else spawnObstacle();
         spawnTimer = 0;
       }
-
       if (updateEntities(collectibles, false)) return;
       if (updateEntities(obstacles, true)) return;
-
       animationFrame = requestAnimationFrame(loop);
     }
 
@@ -722,7 +760,6 @@
       if (["arrowup", "w", " "].includes(key)) { e.preventDefault(); playerState.moveUp = true; }
       if (["arrowdown", "s"].includes(key)) { e.preventDefault(); playerState.moveDown = true; }
     });
-
     window.addEventListener("keyup", (e) => {
       const key = e.key.toLowerCase();
       if (["arrowup", "w", " "].includes(key)) playerState.moveUp = false;
@@ -735,7 +772,6 @@
       gameOverOverlay.style.display = "none";
       startOverlay.style.display = "flex";
     });
-
     updatePlayer();
   </script>
 </body>
